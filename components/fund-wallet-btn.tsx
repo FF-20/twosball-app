@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import OnrampModal from "./onramp-dialog";
 
 const FundWalletBtn = () => {
     const { ready, authenticated, user } = usePrivy();
-    const { theme, setTheme } = useTheme();
+    const { theme } = useTheme();
     const [onrampUrl, setOnrampUrl] = React.useState<string | null>(null);
 
     const fundWallet = async () => {
