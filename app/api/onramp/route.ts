@@ -2,7 +2,6 @@ import { NextResponse, NextRequest } from "next/server";
 import { PrivyClient, AuthTokenClaims } from "@privy-io/server-auth";
 import crypto from "crypto";
 import { cookies } from "next/headers";
-import { on } from "stream";
 
 export type APIError = {
     error: string;
@@ -20,10 +19,11 @@ export type AuthenticationErrorResponse = {
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
 const MOONPAY_BASE_URL = process.env.MOONPAY_BASE_URL;
-const MOONPAY_SECRET_KEY = crypto.createSecretKey(
-    process.env.MOONPAY_SECRET_KEY as string,
-    "utf-8"
-);
+const MOONPAY_SECRET_KEY = process.env.MOONPAY_SECRET_KEY as string;
+
+if (!MOONPAY_SECRET_KEY) {
+    throw new Error("Moonpay secret key is not defined in environment variables.");
+}
 
 const client = new PrivyClient(PRIVY_APP_ID!, PRIVY_APP_SECRET!);
 
