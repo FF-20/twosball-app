@@ -120,7 +120,7 @@ const Hero = () => {
             </div>
 
             {/* Main content */}
-            <h1 className="uppercase font-bold text-8xl text-center mb-12 z-0">
+            <h1 className="uppercase font-bold text-7xl md:text-8xl text-center mb-12 z-0">
                 Money Beyond Borders
             </h1>
 
@@ -154,22 +154,22 @@ const Hero = () => {
 const TextsTransition = () => {
     return (
         <div className="h-screen">
-            <h1 className="uppercase font-bold text-8xl text-center">
+            <h1 className="uppercase font-bold text-5xl md:text-8xl text-center">
                 A New Way To
             </h1>
-            <h1 className="uppercase font-bold text-8xl text-center text-[#666eff]">
+            <h1 className="uppercase font-bold text-5xl md:text-8xl text-center text-[#666eff]">
                 Pay
             </h1>
-            <h1 className="uppercase font-bold text-8xl text-center text-[#666eff]">
+            <h1 className="uppercase font-bold text-5xl md:text-8xl text-center text-[#666eff]">
                 Send
             </h1>
-            <h1 className="uppercase font-bold text-8xl text-center text-[#666eff]">
+            <h1 className="uppercase font-bold text-5xl md:text-8xl text-center text-[#666eff]">
                 Receive
             </h1>
-            <h1 className="uppercase font-bold text-8xl text-center text-[#666eff]">
+            <h1 className="uppercase font-bold text-5xl md:text-8xl text-center text-[#666eff]">
                 Exchange
             </h1>
-            <h1 className="uppercase font-bold text-8xl text-center text-[#666eff]">
+            <h1 className="uppercase font-bold text-5xl md:text-8xl text-center text-[#666eff]">
                 Get Paid
             </h1>
         </div>
