@@ -1,0 +1,76 @@
+"use client";
+import React, { useState, useEffect } from "react";
+import { getAccessToken, usePrivy } from "@privy-io/react-auth";
+import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
+import OnrampModal from "./onramp-dialog";
+
+const FundWalletBtn = () => {
+    const { ready, authenticated, user } = usePrivy();
+    const { theme, setTheme } = useTheme();
+    const [onrampUrl, setOnrampUrl] = React.useState<string | null>(null);
+
+    const fundWallet = async () => {
+        if (!ready || !authenticated || !user?.wallet?.address) {
+            console.error("Unable to fund wallet.");
+            return;
+        }
+
+        const walletAddress = user.wallet.address;
+        const emailAddress = user.email?.address;
+        const redirectUrl = window.location.href;
+        const authToken = await getAccessToken();
+
+        try {
+            const url = "/api/onramp";
+            const onrampResponse = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(authToken
+                        ? { Authorization: `Bearer ${authToken}` }
+                        : {}),
+                },
+                body: JSON.stringify({
+                    address: walletAddress,
+                    email: emailAddress,
+                    redirectUrl: redirectUrl,
+                    theme: theme,
+                }),
+            });
+
+            if (!onrampResponse.ok) {
+                console.error(
+                    "Failed to fetch onramp URL:",
+                    onrampResponse.statusText
+                );
+                return;
+            }
+
+            const data = await onrampResponse.json();
+
+            setOnrampUrl(data.url);
+        } catch (error) {
+            console.error("Error in funding wallet:", error);
+        }
+    };
+
+    return (
+        <>
+            <OnrampModal
+                onrampUrl={onrampUrl}
+                onClose={() => setOnrampUrl(null)}
+            />
+            <Button
+                className="w-full"
+                onClick={() => {
+                    fundWallet();
+                }}
+            >
+                Reload Wallet
+            </Button>
+        </>
+    );
+};
+
+export default FundWalletBtn;
