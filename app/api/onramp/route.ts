@@ -27,7 +27,7 @@ if (!MOONPAY_SECRET_KEY) {
 
 const client = new PrivyClient(PRIVY_APP_ID!, PRIVY_APP_SECRET!);
 
-// POST /api/onramp will return an onramp URL for the current user
+// POST /api/onramp will return an onramp URL for the current user 
 export async function POST(request: NextRequest) {
     // Authenticate user
     const { address, email, redirectUrl, theme, authToken } = await request.json();
