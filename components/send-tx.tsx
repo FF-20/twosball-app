@@ -60,9 +60,10 @@ export default function SendTxDialog() {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
+        const url = `${window.location.origin}/api/users`;
         const fetchUsers = async () => {
             try {
-                const response = await fetch("/api/users");
+                const response = await fetch(url);
                 const data = await response.json();
                 setUsers(data);
             } catch (error) {
