@@ -22,28 +22,23 @@ const FundWalletBtn = () => {
         const authToken = await getAccessToken();
 
         try {
-            const url = `${window.location.origin}/api/onramp`;
-            const onrampResponse = await fetch(url, {
+            const onrampResponse = await fetch("/api/onramp", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(authToken
-                        ? { Authorization: `Bearer ${authToken}` }
-                        : {}),
                 },
+                credentials: "include",
                 body: JSON.stringify({
                     address: walletAddress,
                     email: emailAddress,
                     redirectUrl: redirectUrl,
                     theme: theme,
+                    authToken: authToken,
                 }),
             });
 
             if (!onrampResponse.ok) {
-                console.error(
-                    "Failed to fetch onramp URL:",
-                    onrampResponse
-                );
+                console.error("Failed to fetch onramp URL:", onrampResponse);
                 return;
             }
 

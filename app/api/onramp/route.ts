@@ -30,14 +30,13 @@ const client = new PrivyClient(PRIVY_APP_ID!, PRIVY_APP_SECRET!);
 // POST /api/onramp will return an onramp URL for the current user
 export async function POST(request: NextRequest) {
     // Authenticate user
-    const headerAuthToken = request.headers
-        .get("authorization")
-        ?.replace(/^Bearer /, "");
+    const { address, email, redirectUrl, theme, authToken } = await request.json();
     const cookieStore = cookies();
     const cookieAuthToken = cookieStore.get("privy-token")?.value;
 
-    const authToken = cookieAuthToken || headerAuthToken;
-    if (!authToken) {
+    const finalAuthToken = authToken || cookieAuthToken;
+
+    if (!finalAuthToken) {
         return NextResponse.json(
             { error: "Missing auth token" } as AuthenticationErrorResponse,
             { status: 401 }
@@ -45,10 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const claims = await client.verifyAuthToken(authToken);
-
-        // Parse request body
-        const { address, email, redirectUrl, theme } = await request.json();
+        const claims = await client.verifyAuthToken(finalAuthToken);
 
         // Validate request parameters
         if (typeof address !== "string") {
