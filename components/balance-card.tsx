@@ -5,8 +5,10 @@ import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { ethers } from "ethers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { parseEther, parseGwei } from 'viem'
+import { parseEther, parseGwei, defineChain } from 'viem'
 import { sepolia } from 'viem/chains'
+import { useWriteContract } from 'wagmi'
+import twosball from '../context/twosball.json'
 
 const BalanceCard = () => {
   const { ready, user } = usePrivy();
@@ -19,6 +21,26 @@ const BalanceCard = () => {
   const [walletInitialized, setWalletInitialized] = useState(false);
   const [smartWalletInitialized, setSmartWalletInitialized] = useState(false);
   const { client: smartContractClient } = useSmartWallets();
+  const { writeContract } = useWriteContract()
+
+  const scrollSepolia = defineChain({
+    id: 534351, // Replace this with your chain's ID
+    name: 'Scroll Sepolia',
+    network: 'scroll-sepolia',
+    nativeCurrency: {
+      decimals: 18, // Replace this with the number of decimals for your chain's native token
+      name: 'Ethereum',
+      symbol: 'ETH',
+    },
+    rpcUrls: {
+      default: {
+        http: ['https://sepolia-rpc.scroll.io'],
+      },
+    },
+    blockExplorers: {
+      default: {name: 'Explorer', url: 'https://sepolia.scrollscan.com'},
+    },
+  });
 
 
   const getProvider = () => {
@@ -77,14 +99,27 @@ const BalanceCard = () => {
     
     const txHash = await smartContractClient.sendTransaction({
       account: smartContractClient.account,
-      chain: sepolia,
+      chain: scrollSepolia,
       to: '0xbc0b9bC6c967BA2e837F4D0069Ed2C2c8ce8425E',
       value: parseEther('0.001'), 
-      maxFeePerGas: parseGwei('20'), // don't change this
+      maxFeePerGas: parseGwei('2'), // don't change this
+      // gasPrice: parseGwei('20'),
       maxPriorityFeePerGas: parseGwei('2'), // don't change this
     })
     console.log(txHash);
   };
+
+  const testSmartContractCall = () => {
+    console.log('test call');
+    writeContract({
+      abi: twosball,
+      address: '0x8Bbf08B5E9F88F8CAdb0d4760b1C60E25edaFba1',
+      functionName: 'deposit',
+      args: [
+        parseEther('0.001')
+      ]
+    })
+  }
 
   // Initial setup effect
   useEffect(() => {
@@ -192,6 +227,14 @@ const BalanceCard = () => {
               className="w-full"
             >
               Send Smart Wallet Transaction
+            </Button>
+            
+            <Button
+              onClick={testSmartContractCall}
+              // disabled={isLoading || !walletInitialized}
+              className="w-full"
+            >
+              Testing
             </Button>
           </div>
         </CardContent>
