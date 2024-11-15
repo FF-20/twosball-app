@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -56,6 +56,7 @@ type FormOutput = {
 
 export default function SendTxDialog() {
     const { ready, user } = usePrivy();
+    const { wallets } = useWallets();
     const [users, setUsers] = useState<User[]>([]);
     const [open, setOpen] = useState(false);
 
@@ -82,27 +83,35 @@ export default function SendTxDialog() {
         },
     });
 
-    function onSubmit(values: FormInput) {
+    async function onSubmit(values: FormInput) {
         // console.log("Sending transaction:", {
         //     to: values.user,
         //     amount: Number(values.amount)
         // });
         //use ethers.js to send the transaction
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const tx = {
-            to: values.user,
-            value: ethers.utils.parseEther(values.amount)
-        };
-        signer.sendTransaction(tx)
-            .then((tx) => {
-                console.log("Transaction sent:", tx);
-            })
-            .catch((error) => {
-                console.error("Failed to send transaction:", error);
-            });
+        const mm_provider = new ethers.providers.Web3Provider(window.ethereum);
+        const pv_provider = await wallets[0].getEthereumProvider();
+
+        console.log(mm_provider);
+        console.log(pv_provider);
+        
+        // console.log(window.ethereum);
+        // console.log(pv_provider);
+
+        // const signer = 
+        // const tx = {
+        //     to: values.user,
+        //     value: ethers.utils.parseEther(values.amount)
+        // };
+        // signer.sendTransaction(tx)
+        //     .then((tx) => {
+        //         console.log("Transaction sent:", tx);
+        //     })
+        //     .catch((error) => {
+        //         console.error("Failed to send transaction:", error);
+        //     });
             
-        setOpen(false);
+        // setOpen(false);
     }
 
     // Filter out users without wallet addresses and the current user
