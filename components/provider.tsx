@@ -58,8 +58,8 @@ export default function PrivyProviders({
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
         },
-        defaultChain: sepolia,
-        supportedChains: [sepolia],
+        defaultChain: scrollSepolia,
+        supportedChains: [sepolia, scrollSepolia],
       }}
     >
       <SmartWalletsProvider
@@ -78,9 +78,9 @@ export default function PrivyProviders({
           },
         }}
       >
-        <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
+        {/* <WagmiProvider config={wagmiConfig} reconnectOnMount={false}> */}
           {children}
-        </WagmiProvider>
+        {/* </WagmiProvider> */}
       </SmartWalletsProvider>
     </PrivyProvider>
   );

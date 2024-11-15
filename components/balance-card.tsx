@@ -5,10 +5,23 @@ import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { ethers } from "ethers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { parseEther, parseGwei, defineChain } from 'viem'
-import { sepolia } from 'viem/chains'
-import { useWriteContract } from 'wagmi'
-import twosball from '../context/twosball.json'
+import { parseEther, parseGwei, defineChain } from "viem";
+import { sepolia } from "viem/chains";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
+import { Input } from "./ui/input";
+
+import twosball from "../context/twosball.json";
 
 const BalanceCard = () => {
   const { ready, user } = usePrivy();
@@ -21,28 +34,26 @@ const BalanceCard = () => {
   const [walletInitialized, setWalletInitialized] = useState(false);
   const [smartWalletInitialized, setSmartWalletInitialized] = useState(false);
   const { client: smartContractClient } = useSmartWallets();
-  const { writeContract } = useWriteContract()
+  // const { writeContract } = useWriteContract();
 
   const scrollSepolia = defineChain({
     id: 534351, // Replace this with your chain's ID
-    name: 'Scroll Sepolia',
-    network: 'scroll-sepolia',
+    name: "Scroll Sepolia",
+    network: "scroll-sepolia",
     nativeCurrency: {
       decimals: 18, // Replace this with the number of decimals for your chain's native token
-      name: 'Ethereum',
-      symbol: 'ETH',
+      name: "Ethereum",
+      symbol: "ETH",
     },
     rpcUrls: {
       default: {
-        http: ['https://sepolia-rpc.scroll.io'],
+        http: ["https://sepolia-rpc.scroll.io"],
       },
     },
     blockExplorers: {
-      default: {name: 'Explorer', url: 'https://sepolia.scrollscan.com'},
+      default: { name: "Explorer", url: "https://sepolia.scrollscan.com" },
     },
   });
-
-
   const getProvider = () => {
     return new ethers.providers.EtherscanProvider(
       "sepolia",
@@ -93,33 +104,51 @@ const BalanceCard = () => {
     }
   };
 
+  const FormSchema = z.object({
+    receiver: z.string(),
+    amount: z.string()
+        .refine(
+            (val) => !isNaN(Number(val)) && Number(val) >= 0.0001,
+            "Amount must be at least 0.0001"
+        )
+})
+
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      amount: "0.0001",
+    },
+  });
+
+  type FormInput = {
+    receiver: string;
+    amount: string;
+  };
+
   const sendSmartWalletTransaction = async () => {
-    if (!smartContractClient)
-      return;
-    
+    if (!smartContractClient) return;
+
     const txHash = await smartContractClient.sendTransaction({
       account: smartContractClient.account,
       chain: scrollSepolia,
-      to: '0xbc0b9bC6c967BA2e837F4D0069Ed2C2c8ce8425E',
-      value: parseEther('0.001'), 
-      maxFeePerGas: parseGwei('2'), // don't change this
+      to: "0xbc0b9bC6c967BA2e837F4D0069Ed2C2c8ce8425E",
+      value: parseEther("0.001"),
+      maxFeePerGas: parseGwei("2"), // don't change this
       // gasPrice: parseGwei('20'),
-      maxPriorityFeePerGas: parseGwei('2'), // don't change this
-    })
+      maxPriorityFeePerGas: parseGwei("2"), // don't change this
+    });
     console.log(txHash);
   };
 
-  const testSmartContractCall = () => {
-    console.log('test call');
-    writeContract({
-      abi: twosball,
-      address: '0x8Bbf08B5E9F88F8CAdb0d4760b1C60E25edaFba1',
-      functionName: 'deposit',
-      args: [
-        parseEther('0.001')
-      ]
-    })
-  }
+  // const testSmartContractCall = () => {
+  //   console.log("test call");
+  //   writeContract({
+  //     abi: twosball,
+  //     address: "0x8Bbf08B5E9F88F8CAdb0d4760b1C60E25edaFba1",
+  //     functionName: "deposit",
+  //     args: [parseEther("0.001")],
+  //   });
+  // };
 
   // Initial setup effect
   useEffect(() => {
@@ -214,13 +243,51 @@ const BalanceCard = () => {
               </div>
             )}
 
-            <Button
-              onClick={updateBalance}
-              disabled={isLoading || !walletInitialized}
-              className="w-full"
-            >
-              {isLoading ? "Refreshing..." : "Refresh Balance"}
-            </Button>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(sendSmartWalletTransaction)}
+                className="w-full space-y-6"
+              >
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Amount" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="receiver"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Receiver" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  onClick={updateBalance}
+                  disabled={isLoading || !walletInitialized}
+                  className="w-full"
+                >
+                  {isLoading ? "Refreshing..." : "Refresh Balance"}
+                </Button>
+                <Button
+                  //   onClick={sendSmartWalletTransaction}
+                  // disabled={isLoading || !walletInitialized}
+                  className="w-full"
+                  type="submit"
+                >
+                  Send Smart Wallet Transaction
+                </Button>
+              </form>
+            </Form>
+
             <Button
               onClick={sendSmartWalletTransaction}
               // disabled={isLoading || !walletInitialized}
@@ -228,14 +295,14 @@ const BalanceCard = () => {
             >
               Send Smart Wallet Transaction
             </Button>
-            
-            <Button
-              onClick={testSmartContractCall}
+
+            {/* <Button
+              onClick={}
               // disabled={isLoading || !walletInitialized}
               className="w-full"
             >
               Testing
-            </Button>
+            </Button> */}
           </div>
         </CardContent>
       </Card>
